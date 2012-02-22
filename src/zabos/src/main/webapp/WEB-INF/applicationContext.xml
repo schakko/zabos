@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ws="http://jax-ws.dev.java.net/spring/core"
+	xmlns:wss="http://jax-ws.dev.java.net/spring/servlet" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<!-- Datenbank-Verbindung -->
+	<bean name="dbResource" id="dbResource" class="de.ecw.zabos.sql.resource.DBResource">
+		<constructor-arg type="java.lang.String"
+			value="de.ecw.zabos.sql.util.PgSQLConnection" />
+		<constructor-arg type="java.lang.String"
+			value="jdbc:postgresql://db-prod/zabos_test" />
+		<constructor-arg type="java.lang.String" value="zabos" />
+		<constructor-arg type="java.lang.String" value="zabos" />
+	</bean>
+
+	<!-- System-Konfigurationsinstanz -->
+	<bean name="systemKonfiguration" id="sytemKonfiguration"
+		class="de.ecw.zabos.SystemKonfigurationFactory" factory-method="createInstance">
+		<constructor-arg ref="dbResource" />
+	</bean>
+
+	<!-- Internationalisierung der SMSen -->
+	<bean name="smsContent" id="smsContent" class="de.ecw.zabos.broadcast.sms.SmsContent">
+		<constructor-arg>
+			<bean
+				class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+				<property name="basename" value="/WEB-INF/messages/smscontent" />
+			</bean>
+		</constructor-arg>
+	</bean>
+
+
+	<!-- Lizenz -->
+	<bean name="license" id="license" class="de.ecw.zabos.license.License">
+		<constructor-arg value="zabos.license" />
+	</bean>
+
+	<!-- Services -->
+	<bean name="alarmService" id="alarmService"
+		class="de.ecw.zabos.service.alarm.klinikum.KlinikumAlarmService">
+		<!-- Neue Instanz der Datenbankverbindung erstellen -->
+		<constructor-arg type="de.ecw.zabos.sql.resource.DBResource">
+			<bean parent="dbResource" />
+		</constructor-arg>
+		<constructor-arg ref="systemKonfiguration" />
+		<constructor-arg ref="smsContent" />
+		<property name="alarmInterceptor" ref="alarmInterceptor"></property>
+	</bean>
+
+	<bean name="smsInService" id="smsInService"
+		class="de.ecw.zabos.service.smsin.klinikum.KlinikumSmsInService">
+		<!-- Neue Instanz der Datenbankverbindung erstellen -->
+		<constructor-arg type="de.ecw.zabos.sql.resource.DBResource">
+			<bean parent="dbResource" />
+		</constructor-arg>
+		<constructor-arg ref="alarmService" />
+		<constructor-arg ref="systemKonfiguration" />
+		<constructor-arg ref="smsContent" />
+	</bean>
+
+
+	<!-- Daemons -->
+	<bean name="thirdPartyDaemon" id="thirdPartyDaemon"
+		class="de.ecw.zabos.alarm.consumer.zvei.daemon.ZveiDaemon">
+		<!-- Neue Instanz der Datenbankverbindung erstellen -->
+		<constructor-arg type="de.ecw.zabos.sql.resource.DBResource">
+			<bean parent="dbResource" />
+		</constructor-arg>
+		<constructor-arg ref="alarmService" />
+	</bean>
+
+	<bean name="mc35ManagerDaemon" id="mc35ManagerDaemon"
+		class="de.ecw.zabos.mc35.MC35ManagerDaemon">
+		<!-- Neue Instanz der Datenbankverbindung erstellen -->
+		<constructor-arg type="de.ecw.zabos.sql.resource.DBResource">
+			<bean parent="dbResource" />
+		</constructor-arg>
+		<constructor-arg type="de.ecw.zabos.service.smsin.ISmsInService"
+			ref="smsInService" />
+	</bean>
+
+	<bean name="alarmDaemon" id="alarmDaemon"
+		class="de.ecw.zabos.alarm.daemon.AlarmDaemon">
+		<constructor-arg ref="dbResource" />
+		<constructor-arg ref="alarmService" />
+		<constructor-arg type="de.ecw.zabos.service.smsin.ISmsInService"
+			ref="smsInService" />
+	</bean>
+
+	<!-- Klassen zum Erzeugen und Verschicken der SMSen -->
+	<bean name="mailSender" id="mailSender"
+		class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="port" value="25" />
+		<property name="host" value="localhost" />
+	</bean>
+
+	<bean name="smsBroadcaster" id="smsBroadcaster"
+		class="de.ecw.zabos.broadcast.transport.mail.MailBroadcaster" scope="prototype">
+		<property name="mailSender" ref="mailSender" />
+		<!-- body, to, from und subject nutzen SPEL zum dynamischen Einfügen der 
+			Properties -->
+		<property name="body" value="smsOutVO.nachricht" />
+		<property name="subject" value="'An: ' + handyNr" />
+		<property name="from" value="'zabos-outgoing@localhost'" />
+		<!--  Beim Load-Balancing werden die Nachrichten zwischen den to-Adressen abwechselnd gesendet -->
+		<property name="useLoadBalancing" value="true" />
+		<property name="to">
+			<array value-type="ava.lang.String">
+				<value>'loadbalancer_1@your.domain'</value>
+				<value>'loadbalancer_2@your.domain'</value>
+			</array>
+		</property>
+	</bean>
+
+	<bean name="broadcastDaemon" id="broadcastDaemon"
+		class="de.ecw.zabos.broadcast.BroadcastMgr">
+		<!-- Neue Instanz der Datenbankverbindung erstellen -->
+		<constructor-arg type="de.ecw.zabos.sql.resource.DBResource">
+			<bean parent="dbResource" />
+		</constructor-arg>
+		<constructor-arg type="de.ecw.zabos.mc35.MC35ManagerDaemon"
+			ref="mc35ManagerDaemon" />
+		<!-- unsere Factory ist dafür zuständig, dass die einzelnen Instanzen erzeugt 
+			werden -->
+		<constructor-arg type="de.ecw.zabos.broadcast.BroadcasterFactory">
+			<bean class="de.ecw.zabos.broadcast.BroadcasterFactory">
+				<constructor-arg type="java.lang.String">
+					<value>smsBroadcaster</value>
+				</constructor-arg>
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<!-- Daemon-Manager zum Verwalten aller Daemons -->
+	<bean name="daemonManager" id="daemonManager" class="de.ecw.daemon.DaemonMgr"
+		destroy-method="free" init-method="init">
+		<property name="managedDaemons">
+			<list>
+				<bean class="de.ecw.zabos.mc35.SerialPortIdentifierDaemon">
+					<property name="additionalPortNames">
+						<list>
+							<value>/dev/tx0000</value>
+							<value>/dev/tx0001</value>
+						</list>
+					</property>
+				</bean>
+				<ref bean="alarmDaemon" />
+				<ref bean="broadcastDaemon" />
+				<ref bean="thirdPartyDaemon" />
+				<ref bean="mc35ManagerDaemon" />
+			</list>
+		</property>
+	</bean>
+
+	<bean name="alarmInterceptor" id="alarmInterceptor"
+		class="de.ecw.zabos.service.alarm.ext.AlarmInterceptorDelegator">
+		<property name="interceptors">
+			<map>
+				<entry>
+					<key>
+						<util:constant
+							static-field="de.ecw.zabos.service.alarm.ext.AlarmInterceptorActionType.AFTER_ALARM_DEAKTIVIEREN"></util:constant>
+					</key>
+					<list>
+						<ref bean="printingAlarmInterceptor" />
+					</list>
+				</entry>
+				<entry>
+					<key>
+						<util:constant
+							static-field="de.ecw.zabos.service.alarm.ext.AlarmInterceptorActionType.AFTER_ALARM_ENTWARNEN"></util:constant>
+					</key>
+					<list>
+						<ref bean="printingAlarmInterceptor" />
+					</list>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="connectionHelper" class="de.ecw.zabos.sql.resource.ConnectionHelper" />
+
+	<bean name="reportService" id="reportService"
+		class="de.ecw.report.service.WebReportService" init-method="init">
+		<property name="dataDir" value="c:/temp/reports"></property>
+		<property name="engineHome" value="WEB-INF/platform"></property>
+		<property name="reportDesignDir" value="WEB-INF/reports"></property>
+		<property name="connection">
+			<bean factory-bean="connectionHelper" factory-method="createConnection">
+				<constructor-arg ref="dbResource" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean name="reportCreationService" id="reportCreationService"
+		class="de.ecw.zabos.report.ReportCreationService">
+		<constructor-arg ref="dbResource" />
+		<constructor-arg ref="reportService" />
+	</bean>
+
+	<bean name="printingAlarmInterceptor" id="printingAlarmInterceptor"
+		class="de.ecw.zabos.service.alarm.ext.interceptors.ReportPrintingInterceptor">
+		<constructor-arg ref="reportCreationService" />
+		<constructor-arg ref="dbResource" />
+		<property name="commandArguments">
+			<list>
+				<value>cmd.exe</value>
+				<value>/C</value>
+				<value>c:/temp/reports/test.bat</value>
+				<value>%abs_path%</value>
+				<value>%drucker_kuerzel%</value>
+				<value>%uid%</value>
+			</list>
+		</property>
+		<property name="environmentVariables">
+			<map>
+			</map>
+		</property>
+	</bean>
+
+	<bean name="bereichInSchleifeFinder" id="bereichInSchleifeFinder"
+		class="de.ecw.zabos.frontend.controllers.helpers.BereichInSchleifeFinder">
+		<constructor-arg ref="dbResource" />
+	</bean>
+
+	<!-- Controller -->
+	<bean name="AlarmierungController" id="AlarmierungController"
+		class="de.ecw.zabos.frontend.controllers.AlarmierungController">
+		<constructor-arg ref="dbResource" />
+		<property name="alarmService" ref="alarmService" />
+	</bean>
+
+	<bean name="HierarchieController" id="HierarchieController"
+		class="de.ecw.zabos.frontend.controllers.HierarchieController">
+		<constructor-arg ref="dbResource" />
+	</bean>
+
+	<bean name="OrganisationController" id="OrganisationController"
+		class="de.ecw.zabos.frontend.controllers.OrganisationController">
+		<constructor-arg ref="dbResource" />
+	</bean>
+
+	<bean name="OrganisationseinheitController" id="OrganisationseinheitController"
+		class="de.ecw.zabos.frontend.controllers.OrganisationseinheitController">
+		<constructor-arg ref="dbResource" />
+	</bean>
+	<bean name="PersonController" id="PersonController"
+		class="de.ecw.zabos.frontend.controllers.PersonController">
+		<constructor-arg ref="dbResource" />
+		<property name="license" ref="license" />
+	</bean>
+
+	<bean name="ReportController" id="ReportController"
+		class="de.ecw.zabos.frontend.controllers.ReportController">
+		<constructor-arg ref="dbResource" />
+		<property name="alarmService" ref="alarmService" />
+		<property name="jspFileReportDetail" value="object.klinikum.jsp" />
+	</bean>
+
+	<bean name="SchleifeController" id="SchleifeController"
+		class="de.ecw.zabos.frontend.controllers.SchleifeController">
+		<constructor-arg ref="dbResource" />
+		<property name="license" ref="license" />
+	</bean>
+
+	<bean name="SecurityController" id="SecurityController"
+		class="de.ecw.zabos.frontend.controllers.SecurityController">
+		<constructor-arg ref="dbResource" />
+	</bean>
+
+	<bean name="SystemController" id="SystemController"
+		class="de.ecw.zabos.frontend.controllers.SystemController">
+		<constructor-arg ref="dbResource" />
+		<constructor-arg ref="sytemKonfiguration" />
+		<property name="mc35ManagerDaemon" ref="mc35ManagerDaemon" />
+		<property name="license" ref="license" />
+	</bean>
+
+	<bean name="StatistikController" id="StatistikController"
+		class="de.ecw.zabos.frontend.controllers.StatistikController">
+		<constructor-arg ref="dbResource" />
+		<constructor-arg ref="bereichInSchleifeFinder" />
+	</bean>
+
+
+	<bean name="AjaxController" id="AjaxController"
+		class="de.ecw.zabos.frontend.controllers.AjaxController">
+		<constructor-arg ref="dbResource" />
+		<property name="methods">
+			<list>
+				<bean class="de.ecw.zabos.frontend.ajax.published.FindOrganisationen">
+					<constructor-arg ref="dbResource"></constructor-arg>
+				</bean>
+				<bean class="de.ecw.zabos.frontend.ajax.published.FindLetzteAlarmierungen">
+					<constructor-arg ref="dbResource"></constructor-arg>
+					<property name="alarmService" ref="alarmService" />
+				</bean>
+				<bean
+					class="de.ecw.zabos.frontend.ajax.published.FindLetzteAlarmierungenMitBerechtigung">
+					<constructor-arg ref="dbResource"></constructor-arg>
+					<property name="alarmService" ref="alarmService" />
+				</bean>
+				<bean
+					class="de.ecw.zabos.frontend.ajax.published.FindOrganisationseinheitenInOrganisation">
+					<constructor-arg ref="dbResource"></constructor-arg>
+				</bean>
+				<bean class="de.ecw.zabos.frontend.ajax.published.FindPersonById">
+					<constructor-arg ref="dbResource"></constructor-arg>
+				</bean>
+				<bean class="de.ecw.zabos.frontend.ajax.published.FindPersonByPattern">
+					<constructor-arg ref="dbResource"></constructor-arg>
+				</bean>
+				<bean
+					class="de.ecw.zabos.frontend.ajax.published.FindPersonenInOrganisation">
+					<constructor-arg ref="dbResource"></constructor-arg>
+				</bean>
+				<bean
+					class="de.ecw.zabos.frontend.ajax.published.FindPersonenInOrganisationseinheit">
+					<constructor-arg ref="dbResource"></constructor-arg>
+				</bean>
+				<bean class="de.ecw.zabos.frontend.ajax.published.FindPersonenInSystem">
+					<constructor-arg ref="dbResource"></constructor-arg>
+				</bean>
+				<bean
+					class="de.ecw.zabos.frontend.ajax.published.FindSchleifenByPatternMitAusloeseberechtigung">
+					<constructor-arg ref="dbResource"></constructor-arg>
+				</bean>
+				<bean
+					class="de.ecw.zabos.frontend.ajax.published.FindSchleifenInOrganisationMitAusloeseberechtigung">
+					<constructor-arg ref="dbResource"></constructor-arg>
+				</bean>
+				<bean
+					class="de.ecw.zabos.frontend.ajax.published.FindSchleifenInOrganisationseinheitMitAusloeseberechtigung">
+					<constructor-arg ref="dbResource"></constructor-arg>
+				</bean>
+				<bean
+					class="de.ecw.zabos.frontend.ajax.published.FindSchleifenInSystemMitAusloeseberechtigung">
+					<constructor-arg ref="dbResource"></constructor-arg>
+				</bean>
+				<bean class="de.ecw.zabos.frontend.ajax.published.GetAlarmReport">
+					<constructor-arg ref="dbResource"></constructor-arg>
+					<property name="alarmService" ref="alarmService" />
+				</bean>
+				<bean class="de.ecw.zabos.frontend.ajax.published.SetLeitungsKommentar">
+					<constructor-arg ref="dbResource" />
+				</bean>
+				<bean
+					class="de.ecw.zabos.frontend.ajax.published.FindFunktionstraegerMitBereichen">
+					<constructor-arg ref="dbResource" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+</beans>

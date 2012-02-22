@@ -1,0 +1,147 @@
+@charset "utf-8";
+
+a:link {font-family: Verdana, Arial, Helvetica, sans-serif; color: #FFF; font-size: 12px; /*text-decoration:none*/;
+}
+a:active {font-family: Verdana, Arial, Helvetica, sans-serif; color: #FFF; font-size: 12px; /*text-decoration:none*/;
+}
+a:visited {font-family: Verdana, Arial, Helvetica, sans-serif; color: #FFF; font-size: 12px; /*text-decoration:none*/;
+}
+a:hover {font-family: Verdana, Arial, Helvetica, sans-serif; color: #FFF; font-size: 12px; /*text-decoration:none*/;
+}
+img {
+	border:none;
+}
+.reportid a {
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	color: #900; 
+	font-size: 12px; 
+	text-decoration:none;		
+}
+
+.head_eeeeee a:link, .head_eeeeee a:visited {
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	color: #F00; 
+	font-size: 12px; 
+	text-decoration:none;
+}
+.head_eeeeee a:hover, .head_eeeeee a:active  {
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	color: #C00; 
+	font-size: 12px; 
+	text-decoration:none;
+}
+.head_normal a:link, .head_normal a:visited {
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	color: #FFF; 
+	font-size: 12px; 
+	text-decoration:none;
+}
+.head_normal a:hover, .head_normal a:active {
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	color: #DCC; 
+	font-size: 12px; 
+	text-decoration:none;
+}
+.head_highlight a {
+	text-decoration:none;
+}
+/*
+.newtreeobject {
+	background-color: #900;
+	padding-left: 10px;
+	padding-right: 10px;
+	
+	margin-top:10px;
+	margin-bottom: 100px;
+	
+	font-size:8px;
+	font-weight: normal;
+	border: 1px solid #DDD;		
+}
+*/
+.newtreeobject a:link, .newtreeobject a:visited {
+	color: #F0F;
+	border:none;
+	text-decoration:none;
+}
+.tree_level_2 a:link, .tree_level_2 a:visited {
+	color: #000;
+	border:none;	
+	text-decoration:none;
+}
+.tree_level_1 a:link, .tree_level_1 a:visited {
+	color: #000;
+	border:none;	
+	text-decoration:none;
+}
+.tree_level_3 a:link, .tree_level_3 a:visited {
+	color: #000;
+	border:none;
+	text-decoration:none;
+}
+
+.tree a:link, .tree a:visited {
+	color: #000;
+	background-repeat:no-repeat;
+	padding-left:13px;	
+	padding-top:3px;
+	font-size:12px;		
+	border:none;
+	text-decoration:none;
+}
+.tree a:active, .tree a:hover {
+	color: #000;
+	background-repeat:no-repeat;
+	padding-left:13px;
+	border:none;
+	text-decoration:none;
+}
+
+.system a:link, .system a:visited {
+	color: #000;
+	background-repeat:no-repeat;	
+	padding:0;	
+	text-decoration:none;
+}
+.system a:active, .system a:hover {
+	color: #000;
+	background-repeat:no-repeat;	
+	padding:0;	
+	text-decoration:none;
+}
+
+.logout a:active,.logout a:link, .logout a:hover, .logout a:visited {
+	color: #fff;
+	padding:0;	
+	text-decoration:none;
+	font-weight:bold;
+}
+
+.settings a:link, .settings a:visited {
+	color: #990000;
+	font-weight:bold;
+}
+.settings a:active, .settings a:hover {
+	color: #F00;
+	font-weight:bold;	
+}
+.baselink a:link, .baselink a:visited {
+	color: #900;
+}
+.baselink a:active {
+	color: #900;
+}
+.settings a:hover {
+	color: #000;
+}
+.titel a:link, .titel a:visited {
+	color: #000;
+}
+.titel a:active, .titel a:hover {
+	color: #000;
+
+}
+.tree_image {
+	border:none;
+	padding-right: 3px;
+}

@@ -1,0 +1,12 @@
+@charset "utf-8";
+
+.report {}
+
+.report a:link {font-family: Verdana, Arial, Helvetica, sans-serif; color: #900; font-size: 14px; text-decoration:none;
+}
+.report a:active {font-family: Verdana, Arial, Helvetica, sans-serif; color: #900; font-size: 14px; text-decoration:none;
+}
+.report a:visited {font-family: Verdana, Arial, Helvetica, sans-serif; color: #900; font-size: 14px; text-decoration:none;
+}
+.report a:hover {font-family: Verdana, Arial, Helvetica, sans-serif; color: #F00; font-size: 14px; text-decoration:none;
+}

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	<appender name="default" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p %d{ISO8601}: %C::%M: %m%n" />
+		</layout>
+	</appender>
+	<!--  Log to file -->
+	<!--
+		<appender name="default"
+		class="org.apache.log4j.DailyRollingFileAppender"> <param
+		name="datePattern" value="'.'yyyyMMdd " /> <param name="file"
+		value="/opt/tomcat/zabos/zabos.log" /> <param name="Append"
+		value="true" /> <layout class="org.apache.log4j.PatternLayout"> <param
+		name="ConversionPattern" value="%-5p %d{ISO8601}: %C::%M: %m%n" />
+		</layout> </appender>
+	-->
+	<root>
+		<priority value="error" />
+		<appender-ref ref="default" />
+	</root>
+	<!--  messages from Spring are not so important -->
+	<logger name="org.springframework">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="org.eclipse.birt">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="de.ecw">
+		<level value="DEBUG" />
+	</logger>
+</log4j:configuration>

@@ -1,0 +1,60 @@
+@charset "utf-8";
+
+select {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+	color: #333333;
+	text-decoration: none;
+	width: 210px;
+	border: 1px solid #d0c5c5;
+}
+input.input {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+	color: #333333;
+	background-color: #FFFFFF;
+	border: 1px solid #d0c5c5;
+	height: 20px;
+	padding-left:5px;
+}
+input.input_long {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+	color: #333333;
+	background-color: #FFFFFF;
+	border: 1px solid #d0c5c5;
+	height: 20px;
+	padding-left:5px;
+	width: 203px;
+}
+select.input, select {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #333333;
+	background-color: #FFFFFF;
+/*	border: 1px solid #d0c5c5; */
+	padding-left:3px;
+}
+input.button {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+/*	color: #FFFFFF; 
+	background-color: #990000;
+	border: 1px solid #ffffff; */
+	height: 22px;
+	width: 140px;
+}
+input.button_min {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+/*	color: #FFFFFF;
+	background-color: #990000;
+	border: 1px solid #ffffff; */
+	height: 22px;
+	width: 35px;
+}
