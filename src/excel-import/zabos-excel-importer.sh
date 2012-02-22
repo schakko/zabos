@@ -1,0 +1,2 @@
+#!/bin/sh
+/opt/jre1.5.0_06/bin/java -cp "/opt/tomcat/common/lib/log4j-1.2.8.jar:/opt/tomcat/common/lib/servlet-api.jar:/opt/tomcat/common/lib/ZabosBackend.jar:/opt/tomcat/common/lib/postgresql-8.1-404.jdbc3.jar:/opt/tomcat/common/lib/ojdbc14.jar:poi-3.1-FINAL-20080629.jar:zabos-excel-importer.jar" de.ecw.zabos.excelimport.ZabosImporter $1 $2 $3 $4 $5 $6 

@@ -1,0 +1,42 @@
+<?xml version="1.0" enocding="ISO-8859-12?">
+<monitordconfig version="1.0">
+	<name>monitord</name>
+	<logfile>/var/log/monitord/monitord.log</logfile>
+	<loglevel>DEBUG</loglevel>
+	<soundcard num="0">
+		<device>plughw:0,0</device>
+		<status>1</status>
+		<baud>220500</baud>
+		<name>Internal Soundcard</name>
+		<channel part="left">
+			<name>Kanal links</name>
+			<module type="zvei">
+				<squelch>50</squelch>
+				<debugmodus>1</debugmodus>
+			</module>
+		</channel>
+	</soundcard>
+	<dataplugins>
+		<plugin name="activemq">
+			<file>/data/monitord/current/plugins/libmplugin_activemq.so</file>
+			<parameters>
+				<logfile>/var/log/monitord/activemq.log</logfile>
+				<loglevel>DEBUG</loglevel>
+				<brokerUri>tcp://127.0.0.1:61616</brokerUri>
+				<clientId>monitord</clientId>
+				<sendTimeout>10</sendTimeout>
+				<closeTimeout>10</closeTimeout>
+				<producerWindowSize>5</producerWindowSize>
+				<useCompression>0</useCompression>
+				<clientAck>0</clientAck>
+				<useTopic>1</useTopic>
+				<deliveryModePersistent>0</deliveryModePersistent>
+				<destUri>zabos</destUri>
+
+				<topic type="zvei">
+					<destUri>zabos.zvei</destUri>
+				</topic>
+			</parameters>
+		</plugin>
+	</dataplugins>
+</monitordconfig>
