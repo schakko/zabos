@@ -1,26 +1,26 @@
-ZABOS
+ï»¿ZABOS
 =====
-ZABOS ist eine webbasierte Applikation zur SMS-Alarmierung von Behörden und Organisationen.
-ZABOS unterstützt Siemens MC35-Modems zum Empfang von eingehenden SMSen für Rückmeldungen und nutzt monitord als Auswerter für ZVEI-, POCSAG- oder FMS-Nachrichten.
+ZABOS ist eine webbasierte Applikation zur SMS-Alarmierung von BehÃ¶rden und Organisationen.
+ZABOS unterstÃ¼tzt Siemens MC35-Modems zum Empfang von eingehenden SMSen fÃ¼r RÃ¼ckmeldungen und nutzt monitord als Auswerter fÃ¼r ZVEI-, POCSAG- oder FMS-Nachrichten.
 
 Features
 --------
-* manuelle Auslösung von Alarmen via Weboberfläche
-* manuelle Auslösung von Alarmen via SMS
-* automatische Auslösung von Alarmen via ZVEI (Fünftonfolgeruf). POCSAG und FMS ist noch nicht implementiert.
-* Rückmeldungen via SMS werden nahezu unverzögert dargestellt
-* Freidefinierbare Aliase für Rückmelde-SMSen (Status: ja, nein, später)
-* Nachalarmierung von Schleifen zum Einsatz von MANVs o.ä. im Klinikumbereich falls Sollstärke für Funktionsträger nicht erreicht ist
-* Reportfunktionalität: automatische Erzeugung von PDFs mit Statistiken
-* Automatischer Druck der PDFs durch Interceptoren/lpr möglich
-* Zuweisen von Aufgaben von alarmierten Personen. Aufgagben können z.B. auf einen großen Bildschirm dargestellt werden, so dass bei Eintreffen der alarmierten Mitarbeiter sofort die Aufgabe ersichtlich ist
+* manuelle AuslÃ¶sung von Alarmen via WeboberflÃ¤che
+* manuelle AuslÃ¶sung von Alarmen via SMS
+* automatische AuslÃ¶sung von Alarmen via ZVEI (FÃ¼nftonfolgeruf). POCSAG und FMS ist noch nicht implementiert.
+* RÃ¼ckmeldungen via SMS werden nahezu unverzÃ¶gert dargestellt
+* Freidefinierbare Aliase fÃ¼r RÃ¼ckmelde-SMSen (Status: ja, nein, spÃ¤ter)
+* Nachalarmierung von Schleifen zum Einsatz von MANVs o.Ã¤. im Klinikumsbereich falls SollstÃ¤rke fÃ¼r FunktionstrÃ¤ger nicht erreicht ist
+* ReportfunktionalitÃ¤t: automatische Erzeugung von PDFs mit Statistiken
+* Automatischer Druck der PDFs durch Interceptoren/lpr mÃ¶glich
+* Zuweisen von Aufgaben von alarmierten Personen. Aufgagben kÃ¶nnen z.B. auf einen groÃŸen Bildschirm dargestellt werden, so dass bei Eintreffen der alarmierten Mitarbeiter sofort die Aufgabe ersichtlich ist
 * fein abgestuftes Rollen-/Rechte-Konzept
-* Abbildung der Organisationsstrukturen über Organisationen, Organisationseinheiten/Standorte und Schleifen
-* Personen können ihre Abwesenheitszeiten pflegen
-* Konnektoren für SMS-Gateways wie SMS 77 oder SMS-One; weitere können einfach erstellt werden
-* Konnektor für Alarmierung per E-Mail
+* Abbildung der Organisationsstrukturen Ã¼ber Organisationen, Organisationseinheiten/Standorte und Schleifen
+* Personen kÃ¶nnen ihre Abwesenheitszeiten pflegen
+* Konnektoren fÃ¼r SMS-Gateways wie SMS 77 oder SMS-One; weitere kÃ¶nnen einfach erstellt werden
+* Konnektor fÃ¼r Alarmierung per E-Mail
 * Verarbeitung von eingehenden SMSen durch MC35-Modems (getestet u.a. mit Trueport IOLAN)
-* Loadbalancing für Verarbeitung der eingehenden SMSen
+* Loadbalancing fÃ¼r Verarbeitung der eingehenden SMSen
 
 Installation
 ------------
@@ -29,12 +29,12 @@ TODO: auf die korrekten JAR-Dateien verweisen.
 
 monitord
 --------
-Die Abnahme von FMS-, POCSAG- und ZVEI-Nachrichten erfolgt über monitord, einen freien Funkauswerter.
+Die Abnahme von FMS-, POCSAG- und ZVEI-Nachrichten erfolgt Ã¼ber monitord, einen freien Funkauswerter.
 monitord muss dazu mit dem libactivemq-Plugin betrieben werden. Die Nachrichten werden monitord in eine bestehende ActiveMQ-Queue gepusht und dann von ZABOS bzw. JMS verarbeitet.
 
 Lizenz
 ------
-ZABOS - Zusatzalarmierung für Behörden und Organisationen mit Sicherheitsaufgaben
+ZABOS - Zusatzalarmierung fÃ¼r BehÃ¶rden und Organisationen mit Sicherheitsaufgaben
 Copyright (C) 2012  EDV Consulting Wohlers GmbH
 
 This program is free software: you can redistribute it and/or modify
@@ -47,4 +47,69 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-Die Lizensierung überträgt sich auf alle vorliegenden Quellcodeteile innerhalb dieses Repositories.
+Die Lizensierung gilt fÃ¼r alle vorliegenden Quellcodeteile innerhalb dieses Repositories auch wenn deren Header nicht explizit mit der GPLv3 markiert ist.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
