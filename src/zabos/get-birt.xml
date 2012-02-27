@@ -55,7 +55,7 @@
 				<var name="file.basename" unset="true" />
 			</sequential>
 		</for>
-		<append>    &lt;/depencies&gt;</append>
+		<append>    &lt;/dependencies&gt;</append>
 		<append>&lt;/project&gt;</append>
 	</target>
 	
