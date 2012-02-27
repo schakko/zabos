@@ -29,7 +29,7 @@
 		<basename property="birt.basename" file="${file.birt.zip}" suffix=".zip" />
 		<propertyregex property="birt.version" input="${birt.basename}" regexp="(.*)\-(\d)_(\d)_(\d)$" select="\2.\3.\4" />
 		<echo message="You are using BIRT version ${birt.version}" />
--		<unzip src="${file.birt.zip}" dest="${tmp.dir}">
+		<unzip src="${file.birt.zip}" dest="${tmp.dir}">
 		</unzip>
 		
 		<for param="file">
