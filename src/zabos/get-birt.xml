@@ -5,7 +5,7 @@
 	<description>Install BIRT in Maven</description>
 	<property name="tmp.dir" value="${java.io.tmpdir}" />
 	<property name="birt.groupid" value="org.eclipse.birt" />
-	<property name="birt-pom.xml" value="birt.pom" />
+	<property name="birt.pom" value="birt-pom.xml" />
 	
 	<macrodef name="append">
 		<text name="line" />
