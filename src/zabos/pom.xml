@@ -48,6 +48,13 @@
 	</build>
 	<dependencies>
 		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<version>3.7.2</version>
+			<artifactId>birt-pom</artifactId>
+			<type>pom</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 			<version>3.0.5.RELEASE</version>
@@ -165,6 +172,28 @@
 			<version>3.0.5.RELEASE</version>
 			<type>jar</type>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>javax.mail-api</artifactId>
+			<version>1.4.5-rc1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+			<version>3.0.5.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.subethamail</groupId>
+			<artifactId>subethasmtp-wiser</artifactId>
+			<version>1.2</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

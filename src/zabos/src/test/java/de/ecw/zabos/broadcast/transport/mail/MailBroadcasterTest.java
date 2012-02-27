@@ -30,7 +30,8 @@ public class MailBroadcasterTest extends ZabosTestAdapter
     @Test
     public void mailBroadcasterOhneLoadBalancing() throws Exception
     {
-        wiser = new Wiser(7777);
+        wiser = new Wiser();
+        wiser.setPort(7777);
         wiser.start();
         SmsOutVO smsOutVo = daoFactory.getObjectFactory().createSmsOut();
         smsOutVo.setContext("context");
@@ -92,7 +93,8 @@ public class MailBroadcasterTest extends ZabosTestAdapter
     @Test
     public void mailBroadcasterMitLoadBalancing() throws Exception
     {
-        wiser = new Wiser(7777);
+        wiser = new Wiser();
+        wiser.setPort(7777);
         wiser.start();
         SmsOutVO smsOutVo = daoFactory.getObjectFactory().createSmsOut();
         smsOutVo.setContext("context");

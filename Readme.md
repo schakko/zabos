@@ -24,8 +24,20 @@ Features
 
 Installation
 ------------
+ZABOS nutzt BIRT zur Erzeugung der Reporte. Damit die Libraries korrekt eingebunden werden, werden folgende Frameworks benötigt:
+* Ant
+* ant-contrib (http://ant-contrib.sourceforge.net)
+* Maven
+
+Es muss folgendermaßen vorgegangen werden:
+
+	# Eclipse BIRT Deployment von http://download.eclipse.org/birt/downloads/ herunterladen
+	cd src/zabos
+	ant -f get-birt.xml
+	# Pfad zum birt-reportengine_X_Y_Z.zip eingeben
+	# Danach die src/zabos/pom.xml anpassen, so dass das version-TAg bei artifactId:org.eclipse.birt auf X.Y.Z steht
+
 ZABOS nutzt als Datenbank PostgreSQL 8.2. Das Schema befindet sich unter database/create_pg.sql.
-TODO: auf die korrekten JAR-Dateien verweisen.
 
 monitord
 --------
