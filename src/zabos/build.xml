@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ZabosCore" default="dist" basedir=".">
+	<description>build.xml fuer ZABOS</description>
+	<exec executable="hostname" outputproperty="host.name" />
+	<property file="build.properties" />
+	<property file="build-${host.name}.properties" />
+
+	<loadfile property="project.version" srcfile="..\..\VERSION" />
+	<tstamp>
+		<format property="project.builddate" locale="de" pattern="yyyyMMdd_HHmm" />
+	</tstamp>
+	<property name="build.fullbuildversion" value="${project.builddate}-${project.version}" />
+
+	<path id="project.class.path">
+		<fileset dir="${dir.lib.prefix}-compile">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${dir.lib.prefix}-test">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${dir.lib.prefix}-provided">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean" description="Lokale Verzeichnisse löschen">
+		<delete dir="${dir.build.base}" />
+	</target>
+
+
+	<target name="mvn-init" unless="compile.classpath" xmlns:artifact="urn:maven-artifact-ant">
+		<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant" classpath="lib/maven-ant-tasks.jar" />
+		<condition property="maven.repo.local" value="${maven.repo.local}" else="${user.home}/.m2/repository">
+			<isset property="maven.repo.local" />
+		</condition>
+		<echo>maven.repo.local=${maven.repo.local}</echo>
+		<artifact:localRepository id="local.repository" path="${maven.repo.local}" />
+		<artifact:pom file="pom.xml" id="maven.project" />
+		<artifact:dependencies pathId="compile.classpath" filesetId="compile.fileset" useScope="compile">
+			<pom refid="maven.project" />
+			<localRepository refid="local.repository" />
+		</artifact:dependencies>
+		<artifact:dependencies pathId="test.classpath" filesetId="test.fileset" useScope="test">
+			<pom refid="maven.project" />
+			<localRepository refid="local.repository" />
+		</artifact:dependencies>
+		<artifact:dependencies pathId="runtime.classpath" filesetId="runtime.fileset" useScope="runtime">
+			<pom refid="maven.project" />
+			<localRepository refid="local.repository" />
+		</artifact:dependencies>
+	</target>
+
+	<target name="mvn-load-dependencies" depends="init, mvn-init">
+		<mkdir dir="${dir.build.maven}" />
+		<mkdir dir="${dir.build.maven}/dependencies-runtime" />
+		<copy todir="${dir.build.maven}/dependencies-runtime" flatten="true">
+			<fileset refid="runtime.fileset" />
+		</copy>
+		<mkdir dir="${dir.build.maven}/dependencies-test" />
+		<copy todir="${dir.build.maven}/dependencies-test" flatten="true">
+			<fileset refid="test.fileset" />
+		</copy>
+		<mkdir dir="${dir.build.maven}/dependencies-compile" />
+		<copy todir="${dir.build.maven}/dependencies-compile" flatten="true">
+			<fileset refid="compile.fileset" />
+		</copy>
+	</target>
+
+	<target name="init" depends="clean">
+		<mkdir dir="${dir.build.base}" />
+		<touch file="${build.log.file}" />
+		<record name="${basedir}/${build.log.file}" loglevel="verbose" />
+		<mkdir dir="${dir.build.src}" />
+		<mkdir dir="${dir.build.webinf}" />
+		<mkdir dir="${dir.dist}" />
+		<mkdir dir="${dir.compiledSource}" />
+		<mkdir dir="${dir.compiledTests}" />
+
+		<echo file="${build.label.file}">${build.fullbuildversion}</echo>
+		<copy todir="${dir.build.src}" overwrite="true">
+			<fileset dir="${dir.src}">
+				<include name="**/*" />
+			</fileset>
+			<filterset>
+				<filter token="VERSION" value="${project.version}" />
+				<filter token="BUILDER" value="${user.name}" />
+				<filter token="BUILD_DATE" value="${project.builddate}" />
+				<filter token="REVISION" value="${project.svn.revision}" />
+			</filterset>
+		</copy>
+	</target>
+
+	<target name="compile" depends="init" description="Kompilierung">
+		<!-- Maven: <javac srcdir="${dir.build.src}" destdir="${dir.compiledSource}" debug="on" nowarn="on" deprecation="on" verbose="on" encoding="UTF-8" classpathref="compile.classpath" /> -->
+		<javac srcdir="${dir.build.src}" destdir="${dir.compiledSource}" debug="on" nowarn="on" deprecation="on" verbose="on" encoding="UTF-8" classpathref="project.class.path" />
+	</target>
+
+	<target name="test" depends="compile">
+		<mkdir dir="${junit.report.dir}" />
+		<javac destdir="${dir.compiledTests}" debug="on" nowarn="on" deprecation="on" verbose="on" encoding="UTF-8">
+			<classpath>
+				<!-- Maven: <path refid="test.fileset" /> -->
+				<path refid="project.class.path" />
+				<pathelement location="${dir.compiledSource}" />
+				<pathelement location="${dir.config}/test" />
+			</classpath>
+			<src path="${dir.tests}" />
+		</javac>
+
+		<junit fork="true" haltonfailure="yes" showoutput="yes">
+			<test name="${junit.entry.class}" todir="${junit.report.dir}" />
+			<formatter type="${junit.formatter.type}" usefile="true" />
+			<classpath>
+				<!-- Maven: <path refid="test.fileset" /> -->
+				<path refid="project.class.path" />
+				<pathelement location="${dir.compiledTests}" />
+				<pathelement location="${dir.compiledSource}" />
+				<pathelement location="${dir.config}/test" />
+			</classpath>
+		</junit>
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar destfile="${dist.jar.file}" basedir="${dir.compiledSource}">
+		</jar>
+	</target>
+
+	<target name="setup-webinf" depends="init" description="Kopiert das WEB-INF-Verzeichnis und die abhängigen JARs">
+		<copy todir="${dir.build.webinf}">
+			<fileset dir="${dir.webinf}" />
+		</copy>
+		<mkdir dir="${dir.build.webinf}/lib" />
+		<!-- Abhängigkeiten von Maven laden -->
+		<!-- <copy todir="${dir.build.webinf}/lib" flatten="true">
+			<fileset refid="runtime.fileset" />
+		</copy>
+		-->
+		<copy todir="${dir.build.webinf}/lib">
+			<fileset dir="${dir.lib.prefix}-compile" />
+		</copy>
+	</target>
+
+	<target name="dist" depends="compile, setup-webinf" description="Erstellt die Distribution lokal">
+		<war file="${dist.war.file}">
+			<fileset dir="${dir.webcontent}">
+				<exclude name="**/WEB-INF*" />
+			</fileset>
+			<webinf dir="${dir.build.webinf}" />
+			<classes dir="${dir.compiledSource}" />
+		</war>
+	</target>
+
+	<target name="remote_init" description="Eingabe der Passphrase">
+		<input message="Please enter passphrase for remote-server:" addproperty="remote.ssh.passphrase" />
+	</target>
+
+	<target name="remote_tomcat_stop" description="Stoppt den Tomcat auf dem Remote-Server" depends="remote_init">
+		<echo>Stopping Tomcat on ${remote.server}</echo>
+		<sshexec host="${remote.server}" port="${remote.ssh.port}" username="${remote.ssh.user}" trust="yes" keyfile="${remote.ssh.pkey}" passphrase="${remote.ssh.passphrase}" command="/etc/init.d/tomcat stop" />
+		<echo>Stopping Tomcat finished.</echo>
+	</target>
+
+	<target name="remote_clean" depends="remote_tomcat_stop" description="Entfernt die JSP-Dateien und alten Servlets auf dem Remote-Server">
+		<echo>Removing old Zabos-files</echo>
+		<sshexec host="${remote.server}" port="${remote.ssh.port}" username="${remote.ssh.user}" trust="yes" keyfile="${remote.ssh.pkey}" passphrase="${remote.ssh.passphrase}" command="rm -f /opt/tomcat/common/lib/Zabos*; rm -Rf /opt/tomcat/work/Catalina/localhost/zabos; rm -Rf /opt/tomcat/webapps/zabos" />
+		<echo>Removing old Zabos-files finished</echo>
+	</target>
+
+	<target name="remote_copy" depends="remote_clean" description="Kopiert die JAR/TARs auf den Remote-Server">
+		<scp passphrase="${remote.ssh.passphrase}" port="${remote.ssh.port}" trust="yes" keyfile="${remote.ssh.pkey}" todir="${remote.ssh.user}@${remote.server}:/opt/tomcat/webapps">
+			<fileset file="${dist.war.file}" />
+		</scp>
+
+		<scp passphrase="${remote.ssh.passphrase}" port="${remote.ssh.port}" trust="yes" keyfile="${remote.ssh.pkey}" todir="${remote.ssh.user}@${remote.server}:/tmp" file="${frontend.dir.dist}/tar/ZabosJSP.tar.gz" />
+	</target>
+
+	<target name="remote_tomcat_initalize" depends="remote_copy" description="Initalisiert den Tomcat. D.h. entpackt die JSP-Dateien und löscht die TAR-Datei. Am Schluss wird der Tomcat gestartet.">
+		<echo>Initialising Tomcat on ${remote.server} (un-taring ZabosJSP.tar.gz, removing /tmp/ZabosJSP.tar.gz, chowning files for tomcat:tomcat, starting Tomcat)</echo>
+		<sshexec host="${remote.server}" port="${remote.ssh.port}" username="${remote.ssh.user}" trust="yes" keyfile="${remote.ssh.pkey}" passphrase="${remote.ssh.passphrase}" command="chown -R /opt/tomcat/webapps/*.war tomcat:tomcat; /etc/init.d/tomcat start" />
+		<echo>Tomcat is up and running.</echo>
+	</target>
+
+	<target name="remote_deploy" depends="dist,remote_tomcat_stop,remote_copy,remote_tomcat_initalize">
+		<echo>Zabos on ${remote.server} succesfully deployed</echo>
+	</target>
+
+	<target name="zabos-test-deploy" depends="dist">
+		<!--		<target name="zabos-test-deploy"> -->
+		<echo>Stopping Tomcat on ${dev.server}</echo>
+		<sshexec host="${dev.server}" port="${dev.ssh.port}" username="${dev.ssh.user}" trust="yes" password="${dev.ssh.passphrase}" command="kill -9 `ps -ef|grep java|grep -v grep|awk '{print $2}'`; rm -Rf ${dev.tomcat.data_dir}/zabos*" />
+		<scp username="${dev.ssh.user}" password="${dev.ssh.passphrase}" port="${dev.ssh.port}" trust="yes" todir="${dev.ssh.user}@${dev.server}:${dev.tomcat.data_dir}">
+			<fileset file="${dist.war.file}" />
+		</scp>
+		<echo>Starting Tomcat on ${dev.server}</echo>
+		<sshexec host="${dev.server}" port="${dev.ssh.port}" username="${dev.ssh.user}" trust="yes" password="${dev.ssh.passphrase}" command="mkdir ${dev.tomcat.data_dir}/zabos; unzip -o ${dev.tomcat.data_dir}/zabos.war -d ${dev.tomcat.data_dir}/zabos; rm ${dev.tomcat.data_dir}/zabos.war" />
+		<scp username="${dev.ssh.user}" password="${dev.ssh.passphrase}" port="${dev.ssh.port}" trust="yes" todir="${dev.ssh.user}@${dev.server}:${dev.tomcat.data_dir}/zabos/WEB-INF">
+			<fileset file="${dir.config}/zabos-dev-test/applicationContext.xml" />
+		</scp>
+		<sshexec host="${dev.server}" port="${dev.ssh.port}" username="${dev.ssh.user}" trust="yes" password="${dev.ssh.passphrase}" command="chown -R tomcat:tomcat ${dev.tomcat.data_dir}/zabos*; ${dev.tomcat.service} start" />
+	</target>
+
+	<target name="doc" depends="compile">
+		<delete dir="${dir.build.doc}" />
+		<mkdir dir="${dir.build.doc}" />
+
+		<javadoc packagenames="*" sourcepath="${dir.build.src}" defaultexcludes="yes" destdir="${dir.build.doc}/api" author="true" version="true" use="true" windowtitle="Zabos API" encoding="UTF-8">
+			<classpath refid="project.class.path" />
+			<doctitle>
+				<![CDATA[<h1>ZABOS API</h1>]]></doctitle>
+		<bottom>
+			<![CDATA[<i>Copyright &#169; 20012 EDV Consulting Wohlers GmbH. All Rights Reserved.</i>]]></bottom>
+	<tag name="todo" scope="all" description="To do:" />
+	<link offline="true" href="http://java.sun.com/products/jdk/1.2/docs/api/" packagelistLoc="C:\tmp" />
+	<link href="http://developer.java.sun.com/developer/products/xml/docs/api/" />
+</javadoc>
+</target>
+</project>
